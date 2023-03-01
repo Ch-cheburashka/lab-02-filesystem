@@ -30,6 +30,20 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(Catch2)
 
+add_library(
+        custom_iterator
+        sources/custom_iterator/custom_iterator.cpp
+)
+
+target_include_directories(custom_iterator PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+        )
 add_executable(signature_analyser
+        signature_analyser/main.cpp
+        )
+add_executable(cli
         cli/main.cpp
         )
+
+target_link_libraries(cli custom_iterator)
