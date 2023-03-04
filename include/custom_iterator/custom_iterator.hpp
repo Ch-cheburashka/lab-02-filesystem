@@ -12,11 +12,9 @@ using path = std::filesystem::path;
 class custom_iterator {
 public:
     custom_iterator(std::map<std::string, std::vector<std::string>> broker, size_t indent, std::string path_str);
-    static bool filename_analyzer(const std::string &s);
-    static std::string broker_seeker(const std::string &s);
-    static std::string date_seeker(const std::string &s);
-    static std::string account_seeker(const std::string &s);
-    std::map<std::string, std::vector<std::string>> get_broker ();
+    [[nodiscard]] std::map<std::string, std::vector<std::string>> get_broker ();
+    custom_iterator info_gatherer ();
+    static std::vector<std::string> components_extractor(const path &p);
 
 private:
     std::map<std::string, std::vector<std::string>> _broker;

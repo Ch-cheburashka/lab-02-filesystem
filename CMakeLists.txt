@@ -33,12 +33,26 @@ FetchContent_MakeAvailable(Catch2)
 add_library(
         custom_iterator
         sources/custom_iterator/custom_iterator.cpp
+        include/custom_iterator/custom_iterator.hpp
+)
+
+add_library(
+        task_1
+        sources/task_1/task_1.cpp
+        include/task_1/task_1.hpp
 )
 
 target_include_directories(custom_iterator PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
         )
+
+target_include_directories(
+        task_1 PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
 add_executable(signature_analyser
         signature_analyser/main.cpp
         )
@@ -47,3 +61,5 @@ add_executable(cli
         )
 
 target_link_libraries(cli custom_iterator)
+target_link_libraries(cli task_1)
+target_link_libraries (task_1 custom_iterator)
