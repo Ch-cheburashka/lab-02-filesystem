@@ -32,65 +32,18 @@ std::string custom_iterator::account_seeker(const std::string &s) {
     return res;
 }
 
-std::map<std::string, std::vector<std::string>> custom_iterator::report_printer(const std::string &s, size_t indent) {
-    std::map<std::string, std::vector<std::string>> map;
-    for (size_t i = 0; i < s.length(); i += indent) {
-        map.emplace(custom_iterator::account_seeker(s.substr(i, indent-1)), std::vector<std::string>{});
-        if (custom_iterator::account_seeker(s.substr(i, indent)) == custom_iterator::account_seeker(s.substr(i + indent - 1, indent))) {
-            map.at(custom_iterator::account_seeker(s.substr(i, indent-1))).emplace_back(
-                    custom_iterator::date_seeker(s.substr(i, indent)));
+custom_iterator::custom_iterator(std::map<std::string, std::vector<std::string>> broker, size_t indent, std::string path_str) : _broker(broker), _indent(indent), _path_str(path_str) {
+    for (size_t i = 0; i < _path_str.length(); i += _indent) {
+        _broker.emplace(custom_iterator::account_seeker(_path_str.substr(i, _indent-1)), std::vector<std::string>{});
+        if (custom_iterator::account_seeker(_path_str.substr(i, _indent)) == custom_iterator::account_seeker(_path_str.substr(i + _indent - 1, _indent))) {
+            _broker.at(custom_iterator::account_seeker(_path_str.substr(i, _indent-1))).emplace_back(
+                    custom_iterator::date_seeker(_path_str.substr(i, _indent)));
         }
         else
-            map.emplace(custom_iterator::account_seeker(s.substr(i, indent)), std::vector<std::string>{});
+            _broker.emplace(custom_iterator::account_seeker(_path_str.substr(i, _indent)), std::vector<std::string>{});
     }
-    return map;
 }
 
-void custom_iterator::iterating(const path &p, bool print) {
-    std::string list, res, ib_s, bcs_s, otk_s;
-    for (auto &entry: std::filesystem::directory_iterator{p}) {
-        if (entry.is_directory()) {
-            if (print)
-                iterating(entry.path(), true);
-            else
-                iterating(entry.path(), false);
-        }
-        if (!custom_iterator::filename_analyzer(entry.path().string()) || entry.is_directory()) {
-            continue;
-        }
-        if (print)
-            std::cout << custom_iterator::broker_seeker(entry.path().string()) << " "
-                      << entry.path().string().erase(0, entry.path().string().find("balance")) << std::endl;
-        else {
-            list.append(custom_iterator::broker_seeker(entry.path().string()) + " " +
-                        entry.path().string().erase(0, entry.path().string().find("balance")) + '\n');
-        }
-    }
-    if (!print) {
-        for (size_t i = 0; i < list.length(); ++i) {
-            if (list.substr(i, 3) == "bcs") {
-                bcs_s.append(list.substr(i, 34));
-            }
-            if (list.substr(i, 2) == "ib") {
-                ib_s.append(list.substr(i, 33));
-            }
-            if (list.substr(i, 8) == "otkritie") {
-                otk_s.append(list.substr(i, 39));
-            }
-        }
-        std::map<std::string, std::vector<std::string>> bcs_ac = custom_iterator::report_printer(bcs_s,34);
-        for (auto& i : bcs_ac) {
-            std::cout << "broker:bsc account:" << i.first << " files:" << i.second.size() << " lastdate: " << i.second[i.second.size()-1] << "\n";
-        }
-
-        std::map<std::string, std::vector<std::string>> ib_ac = custom_iterator::report_printer(ib_s,33);
-        for (auto& i : ib_ac) {
-            std::cout << "broker:ib account:" << i.first << " files:" << i.second.size() << " lastdate: " << i.second[i.second.size()-1] << "\n";
-        }
-
-        std::map<std::string, std::vector<std::string>> otk_ac = custom_iterator::report_printer(otk_s,39);
-        for (auto& i : otk_ac) {
-            std::cout << "broker:otkritie account:" << i.first << " files:" << i.second.size() << " lastdate: " << i.second[i.second.size()-1] << "\n";
-        }
-    }
+std::map<std::string, std::vector<std::string>> custom_iterator::get_broker() {
+    return this->_broker;
 }

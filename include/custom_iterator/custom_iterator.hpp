@@ -11,12 +11,17 @@
 using path = std::filesystem::path;
 class custom_iterator {
 public:
+    custom_iterator(std::map<std::string, std::vector<std::string>> broker, size_t indent, std::string path_str);
     static bool filename_analyzer(const std::string &s);
     static std::string broker_seeker(const std::string &s);
     static std::string date_seeker(const std::string &s);
     static std::string account_seeker(const std::string &s);
-    static std::map<std::string, std::vector<std::string>> report_printer (const std::string &s,size_t indent);
-    static void iterating(const path &p, bool print);
+    std::map<std::string, std::vector<std::string>> get_broker ();
+
+private:
+    std::map<std::string, std::vector<std::string>> _broker;
+    size_t _indent;
+    std::string _path_str;
 };
 
 
