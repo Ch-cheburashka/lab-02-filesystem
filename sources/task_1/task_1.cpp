@@ -16,6 +16,19 @@ std::vector<std::string> components_extractor(const path &p) {
     return components;
 }
 
+path last_date_seeker (std::list<path>& files) {
+    path max_file = files.front();
+    auto max_comp = components_extractor(max_file);
+    for (auto& i : files) {
+        auto cur_comp = components_extractor(i);
+        if (std::stoi(cur_comp[2]) > std::stoi(max_comp[2])) {
+            max_comp = cur_comp;
+            max_file = i;
+        }
+    }
+    return max_file;
+}
+
 std::string broker_seeker(const path &p) {
     std::string res, cur = p.string();
     for (size_t i = cur.find("ftp") + 4; cur[i] != '/'; ++i) {
@@ -84,7 +97,7 @@ void iteration(const path &p, bool files_output) {
     if (!files_output) {
         for (auto &broker: brokers) {
             for (auto &account : broker._accounts) {
-                auto components = components_extractor(account._files.back());
+                auto components = components_extractor(last_date_seeker(account._files));
                 std::cout << "broker:" << broker._name << " account:" << account._name << " files:"
                           << account._files.size() << " lastdate:" << components[2] << "\n";
             }
