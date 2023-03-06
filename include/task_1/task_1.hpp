@@ -7,6 +7,8 @@
 
 #include <filesystem>
 
-void iterating (const std::filesystem::path& path, bool print);
+using path = std::filesystem::path;
+
+void iteration(const std::filesystem::path& path, bool files_output);
 
 #endif //SIGNATURE_ANALYSER_TASK_1_HPP
