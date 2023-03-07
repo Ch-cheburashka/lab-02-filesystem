@@ -46,26 +46,43 @@ bool filename_analyzer(const std::string &s) {
     return false;
 }
 
-void iteration(const path &p, bool files_output) {
+//    if (!files_output) {
+//        for (auto &broker: brokers) {
+//            for (auto &account : broker._accounts) {
+//                auto components = components_extractor(last_date_seeker(account._files));
+//                std::cout << "broker:" << broker._name << " account:" << account._name << " files:"
+//                          << account._files.size() << " lastdate:" << components[2] << "\n";
+//            }
+//        }
+//    }
+
+
+std::vector<broker> iterate (const std::filesystem::path& path, bool files_output) {
     std::vector<broker> brokers;
-    for (auto &entry: std::filesystem::directory_iterator{p}) {
-        if (entry.is_directory()) {
-            iteration(entry.path(),files_output);
-        }
-        if (entry.is_directory() || !filename_analyzer(entry.path().string())) {
+    auto cur_it = begin(std::filesystem::directory_iterator{path});
+    auto cur_path = path;
+    auto cur_dir = begin(std::filesystem::directory_iterator{path});
+    while (true) {
+        if (cur_it == end(std::filesystem::directory_iterator{cur_path})) {
+            cur_dir++;
+            if (cur_dir == end(std::filesystem::directory_iterator{cur_path}))
+                break;
+            cur_it = begin(cur_dir);
+            cur_path = cur_it->path();
             continue;
         }
-        if (files_output)
-            std::cout << broker_seeker(entry.path().string()) << " "
-                      << entry.path().string().erase(0, entry.path().string().find("balance")) << std::endl;
-        else {
-            std::string br = broker_seeker(entry.path());
-            auto components = components_extractor(entry.path());
+        if (cur_it->is_regular_file() && filename_analyzer(cur_it->path()) && files_output)  {
+            std::cout << broker_seeker(cur_it->path().string()) << " "
+                      << cur_it->path().string().erase(0, cur_it->path().string().find("balance")) << std::endl;
+        }
+        if (cur_it->is_regular_file() && filename_analyzer(cur_it->path()) && !files_output) {
+            std::string br = broker_seeker(cur_it->path());
+            auto components = components_extractor(cur_it->path());
             if (brokers.empty() || std::find_if(brokers.begin(), brokers.end(),
                                                 [&br](const broker &broker) { return broker._name == br; }) ==
                                    brokers.end()) {
-                std::list<path> files;
-                files.push_back(entry.path());
+                std::list<std::filesystem::path> files;
+                files.push_back(cur_it->path());
                 account ac(components[1], files);
                 std::vector<account> accounts;
                 accounts.emplace_back(ac);
@@ -73,34 +90,32 @@ void iteration(const path &p, bool files_output) {
             } else {
                 size_t broker_index = 0;
                 for (; broker_index < brokers.size(); ++broker_index) {
-                    if (brokers[broker_index]._name == broker_seeker(entry.path()))
+                    if (brokers[broker_index]._name == broker_seeker(cur_it->path()))
                         break;
                 }
                 auto accounts = brokers[broker_index]._accounts;
                 std::string ac = components[1];
                 if (accounts.empty() || std::find_if(accounts.begin(), accounts.end(),
                                                      [&ac](const account &account) { return account._name == ac; }) == accounts.end()) {
-                    std::list<path> files;
-                    files.push_back(entry.path());
+                    std::list<std::filesystem::path> files;
+                    files.push_back(cur_it->path());
                     brokers[broker_index]._accounts.emplace_back(ac, files);
                 } else {
                     for (size_t account_index = 0; account_index < accounts.size(); ++account_index) {
                         if (accounts[account_index]._name == components[1]) {
-                            brokers[broker_index]._accounts[account_index]._files.push_back(entry.path());
+                            brokers[broker_index]._accounts[account_index]._files.push_back(cur_it->path());
                             break;
                         }
                     }
                 }
             }
         }
-    }
-    if (!files_output) {
-        for (auto &broker: brokers) {
-            for (auto &account : broker._accounts) {
-                auto components = components_extractor(last_date_seeker(account._files));
-                std::cout << "broker:" << broker._name << " account:" << account._name << " files:"
-                          << account._files.size() << " lastdate:" << components[2] << "\n";
-            }
+        if (cur_it->is_directory()) {
+            cur_path = cur_it->path();
+            cur_it = std::filesystem::directory_iterator{cur_it->path()};
+            continue;
         }
+        cur_it++;
     }
+    return brokers;
 }
