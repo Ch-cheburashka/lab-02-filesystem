@@ -36,20 +36,18 @@ add_library(
         include/task_1/task_1.hpp
 )
 
-add_library(
-        broker
-        sources/broker/broker.cpp
-        include/broker/broker.hpp
-)
-
 target_include_directories(
         task_1 PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
 
+add_library(
+        broker INTERFACE
+)
+
 target_include_directories(
-        broker PUBLIC
+        broker INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
@@ -62,5 +60,5 @@ add_executable(cli
         )
 
 target_link_libraries(cli task_1)
-target_link_libraries(task_1 broker)
 target_link_libraries(cli broker)
+target_link_libraries(task_1 broker)

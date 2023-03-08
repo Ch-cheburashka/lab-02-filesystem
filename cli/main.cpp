@@ -10,8 +10,6 @@ void print_help(std::string &&s) {
 
 int main(int argc, char **argv) {
 
-    auto vector = iterate(R"(/mnt/d/projects/lab-02-filesystem/misc/ftp)",true);
-
     if (argc != 2 && argc != 3) {
         print_help("WRONG NUMBER OF ARGUMENTS");
         return 1;
@@ -27,9 +25,10 @@ int main(int argc, char **argv) {
         return 1;
     }
     if (strcmp("-p", argv[argc-1]) == 0) {
-        iterate(p, true);
+        auto info = iterate(p, true);
     } else if (strcmp("-r", argv[argc-1]) == 0) {
-        iterate(p, false);
+        auto info = iterate(p, false);
+        report_printer(info);
     }
     return 0;
 }
