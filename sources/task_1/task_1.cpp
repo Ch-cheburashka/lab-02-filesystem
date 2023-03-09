@@ -46,7 +46,7 @@ bool filename_analyzer(const std::string &s) {
     return false;
 }
 
-std::vector<broker> iterate (const std::filesystem::path& path, bool files_output) {
+std::vector<broker> brokers_gatherer (const std::filesystem::path& path) {
     std::vector<broker> brokers;
     auto cur_it = begin(std::filesystem::directory_iterator{path});
     auto cur_path = path;
@@ -60,11 +60,7 @@ std::vector<broker> iterate (const std::filesystem::path& path, bool files_outpu
             cur_path = cur_it->path();
             continue;
         }
-        if (cur_it->is_regular_file() && filename_analyzer(cur_it->path()) && files_output)  {
-            std::cout << broker_seeker(cur_it->path().string()) << " "
-                      << cur_it->path().string().erase(0, cur_it->path().string().find("balance")) << std::endl;
-        }
-        if (cur_it->is_regular_file() && filename_analyzer(cur_it->path()) && !files_output) {
+        if (cur_it->is_regular_file() && filename_analyzer(cur_it->path())) {
             std::string br = broker_seeker(cur_it->path());
             auto components = components_extractor(cur_it->path());
             if (brokers.empty() || std::find_if(brokers.begin(), brokers.end(),
@@ -117,4 +113,15 @@ void report_printer (const std::vector<broker>& brokers) {
                           << account._files.size() << " lastdate:" << components[2] << "\n";
             }
         }
+}
+
+void files_output (const std::vector<broker>& brokers) {
+    for (auto &broker: brokers) {
+        for (auto &account : broker._accounts) {
+            auto components = components_extractor(last_date_seeker(account._files));
+            for (auto &file : account._files) {
+                std::cout << broker._name << " " << file.string().erase(0, file.string().find("balance")) << "\n";
+            }
+        }
+    }
 }

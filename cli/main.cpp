@@ -24,10 +24,10 @@ int main(int argc, char **argv) {
         print_help("PATH DOES NOT EXIST");
         return 1;
     }
+    auto info = brokers_gatherer(p);
     if (strcmp("-p", argv[argc-1]) == 0) {
-        auto info = iterate(p, true);
+        files_output(info);
     } else if (strcmp("-r", argv[argc-1]) == 0) {
-        auto info = iterate(p, false);
         report_printer(info);
     }
     return 0;
