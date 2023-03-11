@@ -12,8 +12,6 @@ using path = std::filesystem::path;
 
 std::vector<broker> brokers_gatherer (const std::filesystem::path& path);
 
-void report_printer (const std::vector<broker>& brokers);
-
-void files_output (const std::vector<broker>& brokers);
+void report_printer (const std::vector<broker>& brokers, bool files_output);
 
 #endif //SIGNATURE_ANALYSER_TASK_1_HPP

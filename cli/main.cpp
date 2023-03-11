@@ -26,9 +26,9 @@ int main(int argc, char **argv) {
     }
     auto info = brokers_gatherer(p);
     if (strcmp("-p", argv[argc-1]) == 0) {
-        files_output(info);
+        report_printer(info,true);
     } else if (strcmp("-r", argv[argc-1]) == 0) {
-        report_printer(info);
+        report_printer(info,false);
     }
     return 0;
 }
